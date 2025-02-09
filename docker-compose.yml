@@ -1,7 +1,11 @@
 services:
-  backend:
+  dialekti-backend:
     build: ./dialekti-backend
     environment:
       - FLASK_PORT=3000
     ports:
       - "3000:3000"
+  dialekti-db:
+    build: ./dialekti-backend/db
+    ports: 
+      - "5432:5432"

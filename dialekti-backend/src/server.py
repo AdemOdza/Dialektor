@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.config['APPLICATION_ROOT'] = '.'
 
 @app.route('/')
-def version():
+def home():
     return 'Hello, world!'
 
 @app.route('/version')
