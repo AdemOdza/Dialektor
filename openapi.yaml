@@ -61,6 +61,17 @@ paths:
                 type: array
                 items: 
                   $ref: '#/components/schemas/Country'
+                example:
+                  - id: '7eeddda4-afbb-4bc8-bae0-82b514a9c636'
+                    name: 'Albania'
+                  - id: '7f5f295d-06f4-4e79-a709-5f93845cf8ec'
+                    name: 'Kosova'
+                  - id: 'dfca8f48-d8e6-4d8e-beac-5d98887ef238'
+                    name: 'North Macedonia'
+                  - id: '64edfb91-418d-4364-b93d-1fadaf331a4c'
+                    name: 'Montenegro'
+                  - id: '8a39f1e8-bba8-495d-b36d-3dcbb4bd4f70'
+                    name: 'Greece'
         default:
           description: Unexpected error
           content:
@@ -70,8 +81,8 @@ paths:
     post:
       tags:
       - Countries
-      summary: Get all countries
-      description: Get all countries in the database
+      summary: Create a country
+      description: Create a country
       operationId: createCountry
       requestBody:
         required: true
@@ -91,6 +102,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Country'
+        '400':
+          description: Bad Request - Missing country name in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /countries/{id}:
     parameters:
       - in: path
@@ -163,6 +180,70 @@ paths:
                   id:
                     type: string
                     format: uuid
+  /scripts:
+    get:
+      tags:
+        - Scripts
+      summary: Get all scripts
+      description: Get all scripts
+      operationId: getScripts
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Script'
+                example:
+                  - name: 'LATIN'
+                  - name: 'CYRILLIC'
+    post:
+      tags:
+        - Scripts
+      summary: Create a new script
+      description: Create a new script
+      operationId: createScript
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                  $ref: '#/components/schemas/Script'
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Script'
+          '400':
+            description: Bad Request - Missing script name in body
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  /scripts/{name}:
+    parameters:
+      - in: path
+        name: name
+        schema:
+          type: string
+        required: true
+    delete:
+      tags:
+        - Scripts
+      summary: Delete a script
+      description: Delete a script
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Script'
+
 components:
   schemas:
     Country:
@@ -171,11 +252,21 @@ components:
         id:
           type: string
           format: uuid
+          example: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
         name:
           type: string
+          example: 'Albania'
       required:
         - id
         - name
+    Script:
+      type: object
+      properties:
+          name:
+            type: string
+            example: 'LATIN'
+      required:
+          - name
     Error:
       type: object
       properties:
