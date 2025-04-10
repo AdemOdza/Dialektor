@@ -1,11 +1,14 @@
 services:
-  dialekti-backend:
-    build: ./dialekti-backend
+  dialektor-backend:
+    build: ./dialektor-backend
     environment:
       - FLASK_PORT=3000
+      - DATABASE_HOST=dialektor-db
     ports:
       - "3000:3000"
-  dialekti-db:
-    build: ./dialekti-backend/db
+    depends_on:
+      - dialektor-db
+  dialektor-db:
+    build: ./dialektor-backend/db
     ports: 
       - "5432:5432"

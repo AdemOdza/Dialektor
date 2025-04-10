@@ -1,0 +1,185 @@
+openapi: 3.1.1
+info:
+  title: Dialektor Backend
+  description: |-
+    This is the API interface for the Dialektor project
+
+  license:
+    name: GNU GPL
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:3000
+    description: Local server
+
+tags:
+  - name: General
+    description: Miscellaneous Endpoints
+  - name: Countries
+    description: Operations relating to country data
+
+paths:
+  /version:
+    get:
+      tags:
+      - General
+      summary: Gets the current service version
+      description: Retrieves the version of the service and returns it
+      operationId: getVersion
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                required:
+                    - version
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /countries:
+    get:
+      tags:
+      - Countries
+      summary: Get all countries
+      description: Get all countries in the database
+      operationId: getCountries
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Country'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+      - Countries
+      summary: Get all countries
+      description: Get all countries in the database
+      operationId: createCountry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+                - name
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+  /countries/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+    get:
+      tags:
+      - Countries
+      summary: Get a country
+      description: Get the country with the given ID
+      operationId: getCountry
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+        '404':
+          description: Country not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      tags:
+        - Countries
+      summary: Update a country
+      description: Update the country with the given ID
+      operationId: updateCountry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Country'
+        '404':
+          description: Country not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Countries
+      summary: Delete a country
+      description: Delete the country with the given ID
+      operationId: deleteCountry
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+components:
+  schemas:
+    Country:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+        - id
+        - name
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
