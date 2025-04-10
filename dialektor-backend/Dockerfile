@@ -7,7 +7,7 @@ ENV FLASK_ENVIRONMENT=development
 
 EXPOSE 3000
 
-WORKDIR /dialekti
+WORKDIR /dialektor
 
 COPY pyproject.toml ./
 COPY poetry.lock ./
