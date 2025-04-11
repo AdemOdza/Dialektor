@@ -18,6 +18,10 @@ tags:
     description: Miscellaneous Endpoints
   - name: Countries
     description: Operations relating to country data
+  - name: Scripts
+    description: Operations relating to script data
+  - name: Languages
+    description: Operations relating to language data
 
 paths:
   /version:
@@ -243,6 +247,127 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Script'
+  /languages:
+    get:
+      tags:
+        - Languages
+      summary: Get all languages
+      description: Get all languages in the system
+      operationId: getLanguages
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Language'
+                example:
+                    - id: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                      name: 'Albanian'
+                      script: 'LATIN'
+                    - id: '02f3f531-667f-4f65-96ce-4db62a3f2f5c'
+                      name: 'Turkish'
+                      script: 'LATIN'
+                    - id: 'a82fbe46-90f4-4e2e-9667-b0b9d9609467'
+                      name: 'Macedonian'
+                      script: 'CYRILLIC'
+    post:
+      tags:
+        - Languages
+      summary: Create a new language
+      description: Create a new language
+      operationId: createLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Albanian
+                script:
+                  type: string
+                  example: LATIN
+              required:
+                - name
+                - script
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Language'
+          '400':
+            description: Bad Request - Missing script or name in body
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  /languages/{id}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+    get:
+      tags:
+        - Languages
+      summary: Get a Language
+      description: Get the language associated with the given ID
+      operationId: getLanguage
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Language'
+          '400':
+            description: Bad Request - Invalid UUID
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Languages
+      summary: Update a language
+      description: Update the language associated with the ID
+      operationId: updateLanguage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Albanian
+                script:
+                  type: string
+                  example: LATIN
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Language'
+          '400':
+            description: Bad Request - Invalid UUID
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
 
 components:
   schemas:
@@ -267,6 +392,19 @@ components:
             example: 'LATIN'
       required:
           - name
+    Language:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+        name:
+          type: string
+          example: 'Albanian'
+        script:
+          type: string
+          example: 'LATIN'
     Error:
       type: object
       properties:

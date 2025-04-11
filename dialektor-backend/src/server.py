@@ -4,6 +4,7 @@ import os
 from common.versionDIs import selectVersion
 from countries.countryEndpoints import countryRouter
 from scripts.scriptEndpoints import scriptRouter
+from languages.languageEndpoints import languageRouter
 
 flaskPort = int(os.environ["FLASK_PORT"]) if os.environ["FLASK_PORT"] else 3000
 
@@ -14,6 +15,7 @@ app.logger.setLevel(logging.INFO)
 
 app.register_blueprint(countryRouter)
 app.register_blueprint(scriptRouter)
+app.register_blueprint(languageRouter)
 
 
 @app.route("/")
