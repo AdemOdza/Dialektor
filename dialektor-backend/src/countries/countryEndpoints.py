@@ -41,7 +41,7 @@ def countryByIdResource(id: UUID):
     if request.method == "GET":
         return getCountry(id)
     elif request.method == "PATCH":
-        body = request.get_json()
+        body = request.get_json(force=True)
 
         if body.get("name") is None:
             return {"error": 'Error creating country: "name" field missing'}, 400

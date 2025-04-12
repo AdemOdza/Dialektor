@@ -7,7 +7,7 @@ scriptRouter = Blueprint("scripts", __name__, url_prefix="/scripts")
 
 
 @scriptRouter.route("/", methods=("GET", "POST"))
-def scripts():
+def scriptResource():
     if request.method == "GET":
         return getScripts()
     elif request.method == "POST":
