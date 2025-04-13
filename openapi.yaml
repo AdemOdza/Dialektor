@@ -329,6 +329,12 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Language'
+          '404':
+            description: Language ID not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schema/Error'
           '400':
             description: Bad Request - Invalid UUID
             content:
@@ -361,14 +367,231 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Language'
+          '404':
+            description: Language ID not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schema/Error'
           '400':
-            description: Bad Request - Invalid UUID
+            description: Bad Request - Invalid UUID or Invalid Body
             content:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
 
 
+  /languages/{id}/dialects:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+    get:
+      tags:
+        - Languages
+        - Dialects
+      summary: Get the language dialects
+      description: Get the dialects associated with the given Language ID
+      operationId: getLanguageDialects
+      responses:
+          '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Dialect'
+                example:
+                    - id: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                      languageId: '8b5742c8-8c6b-4081-ae46-1e8ddba7f3ab'
+                      name: 'Tosk'
+                    - id: '02f3f531-667f-4f65-96ce-4db62a3f2f5c'
+                      languageId: '8b5742c8-8c6b-4081-ae46-1e8ddba7f3ab'
+                      name: 'Gheg'
+          '404':
+            description: Language ID not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schema/Error'
+          '400':
+            description: Bad Request - Invalid UUID
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Languages
+        - Dialects
+      summary: Add a dialect
+      description: Add a dialect to the specified Language
+      operationId: createDialect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Tosk
+              required:
+                - name
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Dialect'
+        '400':
+          description: Invalid body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schema/Error'
+        '404':
+          description: Language ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schema/Error'
+  /languages/{id}/dialects/{dialectId}:
+    parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: dialectId
+        schema:
+          type: string
+          format: uuid
+        required: true
+    get:
+      tags:
+        - Languages
+        - Dialects
+      summary: Get a dialect
+      description: Get a dialect associated to the specified Language
+      operationId: getDialect
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Dialect'
+        '404':
+          description: Language or Dialect ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schema/Error'
+    patch:
+      tags:
+        - Languages
+        - Dialects
+      summary: Update a dialect
+      description: Update a dialect associated to the specified Language
+      operationId: updateDialect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                  example: Tosk
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Dialect'
+        '404':
+          description: Language or Dialect ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schema/Error'
+        '400':
+          description: No body passed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schema/Error'
+    delete:
+      tags:
+        - Languages
+        - Dialects
+      summary: Delete a dialect
+      description: Delete a dialect associated to the specified Language
+      operationId: deleteDialectFromCountry
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Dialect'
+  /dialects:
+    get:
+      tags:
+        - Dialects
+      summary: Get all Dialects
+      description: Get all dialects
+      operationId: getLanguageDialects
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Dialect'
+                example:
+                    - id: '2c71a348-0fb1-4129-acf9-d2dd944895df'
+                      languageId: '7c6804fd-83c2-4ad3-a765-c6a8940b2cf4'
+                      name: 'Southern'
+                    - id: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                      languageId: '8b5742c8-8c6b-4081-ae46-1e8ddba7f3ab'
+                      name: 'Tosk'
+                    - id: '02f3f531-667f-4f65-96ce-4db62a3f2f5c'
+                      languageId: '8b5742c8-8c6b-4081-ae46-1e8ddba7f3ab'
+                      name: 'Gheg'
+  /dialects/{id}:
+    get:
+      tags:
+        - Dialects
+      summary: Get dialect
+      description: Get dialect associated with the specified id
+      operationId: getDialect
+      responses:
+        '200':
+            description: Successful operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Dialect'
+        '404':
+          description: Dialect with ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#components/schemas/Error'
 components:
   schemas:
     Country:
@@ -405,6 +628,20 @@ components:
         script:
           type: string
           example: 'LATIN'
+    Dialect:
+      type: object
+      properties:
+        id: 
+          type: string
+          format: uuid
+          example: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+        languageId: 
+            type: string
+            format: uuid
+            example: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+        name: 
+            type: string
+            example: 'Gheg'
     Error:
       type: object
       properties:
