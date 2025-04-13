@@ -1,5 +1,6 @@
 import datetime
 import os
+import dataclasses
 from uuid import UUID
 
 
@@ -8,6 +9,9 @@ def getEnv(key: str, default: str = None):
 
 
 def toJson(val):
+    if dataclasses.is_dataclass(val):
+        return val.toJson()
+
     match val:
         case datetime.datetime():
             return val.isoformat()

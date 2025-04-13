@@ -89,12 +89,13 @@ BEFORE UPDATE ON language_to_countries
 FOR EACH ROW EXECUTE PROCEDURE update_metadata();
 
 CREATE TABLE dialects(
-    id UUID PRIMARY KEY,
+    id UUID NOT NULL UNIQUE,
     name TEXT NOT NULL,
     language_id UUID REFERENCES languages(id) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC') NOT NULL,
     updated_by TEXT NOT NULL DEFAULT CURRENT_USER,
-    last_updated TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC') NOT NULL
+    last_updated TIMESTAMP WITH TIME ZONE DEFAULT (NOW() AT TIME ZONE 'UTC') NOT NULL,
+    PRIMARY KEY(id, language_id)
 );
 
 CREATE TRIGGER update_dialects

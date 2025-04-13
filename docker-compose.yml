@@ -2,6 +2,7 @@ services:
   dialektor-backend:
     build: ./dialektor-backend
     environment:
+      - SERVER_ENV=dev
       - FLASK_PORT=3000
       - DATABASE_HOST=dialektor-db
     ports:

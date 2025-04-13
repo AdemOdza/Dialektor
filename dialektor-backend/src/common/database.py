@@ -70,17 +70,17 @@ def _transact(
                 return func()
 
 
-def queryOne(sql: str, params: tuple[Any, ...] = None):
+def queryOne(sql: str, params: tuple[Any, ...] = None) -> tuple[Any,] | None:
     return _query(sql, params, fetchOne=True)
 
 
-def queryMany(sql: str, params: tuple[Any, ...] = None):
-    return _query(sql, params, fetchOne=False)
+def queryMany(sql: str, params: tuple[Any, ...] = None) -> list[tuple[Any,]]:
+    return _query(sql, params, fetchOne=False) or []
 
 
-def updateOne(sql: str, params: tuple[Any, ...] = None):
+def updateOne(sql: str, params: tuple[Any, ...] = None) -> tuple[Any,] | None:
     return _transact(sql, params, fetchOne=True)
 
 
-def updateMany(sql: str, params: tuple[Any, ...] = None):
-    return _transact(sql, params, fetchOne=False)
+def updateMany(sql: str, params: tuple[Any, ...] = None) -> list[tuple[Any,]]:
+    return _transact(sql, params, fetchOne=False) or []
