@@ -22,6 +22,8 @@ tags:
     description: Operations relating to script data
   - name: Languages
     description: Operations relating to language data
+  - name: Regions
+    description: Operations relating to region data
 
 paths:
   /version:
@@ -184,6 +186,196 @@ paths:
                   id:
                     type: string
                     format: uuid
+  
+  
+  /countries/{countryId}/regions:
+    get:
+      tags:
+        - Countries
+        - Regions
+      summary: Get all regions for a country
+      description: Get all regions for the associated country ID. The way these regions are determined will be on a per-country basis. They will only be chosen based on their granularity and how it will affect the map view.
+      responseId: getCountryRegions
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Region'
+                example:
+                  - id: '3ae2b515-0603-4ddc-94f6-d8b154dec7cc'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Tiranë'
+                  - id: '3ae2b515-0603-4ddc-94f6-d8b154dec7cc'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Prrenjas'
+                  - id: '7a7c74d3-a0ae-45e3-909d-695301b7c4d1'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Dibër'
+    post:
+      tags:
+        - Countries
+        - Regions
+      summary: Add a region to a country
+      description: Add a region to the specified country ID
+      requestId: createCountryRegion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: 'Debar'
+                required:
+                    - name
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Region'
+        '400':
+            description: Bad Request - Missing region name in body
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  /countries/{countryId}/regions/{regionId}:
+    get:
+      tags:
+        - Countries
+        - Regions
+      summary: Get a region for a country
+      description: Get the data for a region associated to the country ID
+      requestId: getCountryRegion
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Region'
+        404:
+          description: Region or Country not found
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - Countries
+        - Regions
+      summary: Update a Region
+      description: Update the region on the country associated with their respective IDs
+      requestId: updateCountryRegion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: 'Debar'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Region'
+        400:
+          description: Body is missing from request
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Error'
+        404:
+          description: Region or Country not found
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - Countries
+        - Regions
+      summary: Remove a region from a country
+      description: Remove the region from the country associated with their respective IDs
+      requestId: removeCountryRegion
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Region'
+        404:
+          description: Country not found
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Error'
+  /regions:
+    get:
+      tags:
+        - Regions
+      summary: Get all regions
+      description: Get all regions
+      responseId: getRegions
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Region'
+                example:
+                  - id: '3ae2b515-0603-4ddc-94f6-d8b154dec7cc'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Tiranë'
+                  - id: '3ae2b515-0603-4ddc-94f6-d8b154dec7cc'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Prrenjas'
+                  - id: '7a7c74d3-a0ae-45e3-909d-695301b7c4d1'
+                    country: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+                    name: 'Dibër'
+                  - id: 'cc1bd57b-1faa-4cbb-aff4-dfac22d1567d'
+                    country: 'dfca8f48-d8e6-4d8e-beac-5d98887ef238'
+                    name: 'Debar'
+                  - id: 'e5542acb-0888-4c7b-949a-e83e1e3b4e3f'
+                    country: 'dfca8f48-d8e6-4d8e-beac-5d98887ef238'
+                    name: 'Ohrid'
+  /regions/{id}:
+    get:
+      tags:
+        - Regions
+      summary: Get a region
+      description: Get a region by ID
+      responseId: getRegionById
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+        '404':
+            description: Bad Request - Missing script or name in body
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
   /scripts:
     get:
       tags:
@@ -247,6 +439,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Script'
+
   /languages:
     get:
       tags:
@@ -607,6 +800,24 @@ components:
       required:
         - id
         - name
+    Region:
+        type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+            example: '3ae2b515-0603-4ddc-94f6-d8b154dec7cc'
+          country:
+              type: string
+              format: uuid
+              example: '8d8798a0-b21b-47ec-867e-9960a1afc20a'
+          name:
+            type: string
+            example: 'Tiranë'
+        required:
+          - id
+          - country
+          - name
     Script:
       type: object
       properties:
