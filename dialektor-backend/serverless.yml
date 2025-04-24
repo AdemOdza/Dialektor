@@ -1,0 +1,25 @@
+service: dialektor-api
+
+provider:
+ name: aws
+ runtime: python3.13
+ region: us-east-2
+ memorySize: 128
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    zip: true
+    usePoetry: true
+  wsgi:
+    app: server.app
+    packRequirements: false
+    pythonBin: python3
+functions:
+ app:
+   handler: wsgi_handler.handler
+   events:
+     - http: ANY /
+     - http: 'ANY {proxy+}'

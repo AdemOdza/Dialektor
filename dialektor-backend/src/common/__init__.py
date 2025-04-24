@@ -5,6 +5,7 @@ from uuid import UUID
 
 
 def getEnv(key: str, default: str = None):
+    print(os.environ.get(key, 'None'))
     return os.environ.get(key, default)
 
 

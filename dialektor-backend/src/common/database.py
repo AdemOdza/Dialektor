@@ -16,7 +16,6 @@ dbName = getEnv("DATABASE_NAME", "postgres")
 
 connString = f"postgresql://{dbUser}:{dbPassword}@{dbHost}:{dbPort}/{dbName}"
 
-
 def _query(
     sql: str,
     params: tuple[Any, ...] = None,
@@ -75,6 +74,7 @@ def queryOne(sql: str, params: tuple[Any, ...] = None) -> tuple[Any,] | None:
 
 
 def queryMany(sql: str, params: tuple[Any, ...] = None) -> list[tuple[Any,]]:
+    print(connString)
     return _query(sql, params, fetchOne=False) or []
 
 
