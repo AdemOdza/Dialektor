@@ -1,6 +1,7 @@
 from flask import Flask
 import logging
 import os
+from werkzeug.exceptions import BadRequest
 from common.versionDIs import selectVersion
 from countries.countryEndpoints import countryRouter
 from scripts.scriptEndpoints import scriptRouter
@@ -31,6 +32,11 @@ def home():
 @app.route("/version")
 def version():
     return {"version": selectVersion()["version"]}
+
+
+@app.errorhandler(BadRequest)
+def handle_bad_request(e):
+    return {"error": "Bad Request"}, 400
 
 
 if __name__ == "__main__":

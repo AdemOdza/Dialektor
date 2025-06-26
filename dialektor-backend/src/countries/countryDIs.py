@@ -26,6 +26,7 @@ def selectCountries() -> list[Country]:
 
 
 def selectCountryByID(id: UUID) -> Country | None:
+    print(f"TESTING ID: ${id}")
     sql = """
         SELECT *
         FROM countries

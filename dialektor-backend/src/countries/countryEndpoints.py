@@ -19,7 +19,12 @@ def countriesResource():
 
 def getCountries():
     countries = countryDIs.selectCountries()
-    result = [*map(lambda country: {"id": country.id, "name": country.name}, countries)]
+    result = [
+        *map(
+            lambda country: {"id": toJson(country.id), "name": toJson(country.name)},
+            countries,
+        )
+    ]
     return toJson(result)
 
 
@@ -39,17 +44,18 @@ def createCountry(body: dict):
 
 @countryRouter.route("/<id>", methods=("GET", "PATCH", "DELETE"))
 def countryByIdResource(id: UUID):
+    if request.method == "DELETE":
+        return deleteCountry(id)
+
+    existingCountry = countryDIs.selectCountryByID(id)
+    if existingCountry is None:
+        return toJson({"error": f"Country with ID {id} not found."}), 404
+
     if request.method == "GET":
         return getCountry(id)
     elif request.method == "PATCH":
         body = request.get_json(force=True)
-
-        if body.get("name") is None:
-            return {"error": 'Error creating country: "name" field missing'}, 400
-
         return updateCountry(id, body)
-    elif request.method == "DELETE":
-        return deleteCountry(id)
 
     return {"error": "Not Implemented"}, 501
 
@@ -57,18 +63,17 @@ def countryByIdResource(id: UUID):
 def getCountry(id: UUID):
     country = countryDIs.selectCountryByID(id)
     if country is None:
-        return {"error": f"Country with ID {id} not found."}, 404
-
-    return {"id": country.id, "name": country.name}
+        return toJson({"error": f"Country with ID {id} not found."}), 404
+    return country.toJson()
 
 
 def updateCountry(id: UUID, body: dict):
     country = countryDIs.selectCountryByID(id)
     if country is None:
-        return {"error": f"Country with ID {id} not found."}, 404
+        return {"error": f"Error updating: country with ID {id} not found."}, 404
 
     try:
-        result = countryDIs.updateCountry(id, body.get("name"))
+        result = countryDIs.updateCountry(id, body.get("name", country.name))
         return result.toJson(), 200
     except Exception as e:
         print(
