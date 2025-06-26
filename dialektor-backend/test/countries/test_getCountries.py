@@ -52,7 +52,5 @@ def test_getCountries_ideal_200():
 
     data = r.json()
     for i in range(4):
-        print(i)
-        print(data[i])
         assert data[i]["id"] == ids[i]
         assert data[i]["name"] == names[i]
