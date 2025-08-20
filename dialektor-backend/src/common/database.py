@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, LiteralString, Optional
 import psycopg
 from psycopg.rows import dict_row
 from common import getEnv
@@ -18,69 +18,68 @@ connString = f"postgresql://{dbUser}:{dbPassword}@{dbHost}:{dbPort}/{dbName}"
 
 
 def _query(
-    sql: str,
-    params: tuple[Any, ...] = None,
+    sql: LiteralString,
+    params: Optional[tuple[Any, ...]] = None,
     asDict=True,
     fetchOne=False,
-    dbConnection: psycopg.Connection = None,
-) -> list[tuple[Any, ...]] | tuple[Any, ...]:
+    dbConnection: Optional[psycopg.Connection] = None,
+) -> dict | list[dict] | None:
     # Set prepare_threshold to 0 to prepare every statement
-    if dbConnection is not None:
-        with dbConnection as conn:
-            with conn.cursor() as cur:
-                cur.execute(sql, params=params, prepare=True)
-                func = cur.fetchone if fetchOne else cur.fetchall
-                return func()
 
-    with psycopg.connect(
-        conninfo=connString,
-        # prepare_threshold=0,
-        row_factory=dict_row if asDict else None,
-    ) as conn:
-        with conn.cursor() as cur:
+    with psycopg.connect(conninfo=connString) as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params=params, prepare=True)
             func = cur.fetchone if fetchOne else cur.fetchall
             return func()
 
 
 def _transact(
-    sql: str,
-    params: tuple[Any, ...] = None,
+    sql: LiteralString,
+    params: Optional[tuple[Any, ...]] = None,
     asDict=True,
     fetchOne=False,
-    dbConnection: psycopg.Connection = None,
-) -> list[tuple[Any, ...]] | tuple[Any, ...]:
+    dbConnection: Optional[psycopg.Connection] = None,
+) -> bool:
     # Set prepare_threshold to 0 to prepare every statement
-    if dbConnection is not None:
-        with dbConnection as conn:
+
+    try:
+        with psycopg.connect(
+            conninfo=connString,
+            prepare_threshold=0,
+        ) as conn:
             with conn.cursor() as cur:
-                cur.execute(sql, params=params, prepare=True)
-                func = cur.fetchone if fetchOne else cur.fetchall
-                return func()
-
-    with psycopg.connect(
-        conninfo=connString,
-        prepare_threshold=0,
-        row_factory=dict_row if asDict else None,
-    ) as conn:
-        with conn.cursor() as cur:
-            with conn.transaction():
-                cur.execute(sql, params=params, prepare=True)
-                func = cur.fetchone if fetchOne else cur.fetchall
-                return func()
+                with conn.transaction() as trx:
+                    cur.execute(sql, params=params, prepare=True)
+        return True
+    except:
+        return False
 
 
-def queryOne(sql: str, params: tuple[Any, ...] = None) -> tuple[Any,] | None:
-    return _query(sql, params, fetchOne=True)
+def queryOne(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> dict | None:
+    result = _query(sql, params, fetchOne=True)
+    if isinstance(result, list):
+        return result[0] if result else None
+    return result
 
 
-def queryMany(sql: str, params: tuple[Any, ...] = None) -> list[tuple[Any,]]:
-    return _query(sql, params, fetchOne=False) or []
+def queryMany(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> list[dict]:
+    result = _query(sql, params, fetchOne=False)
+    if isinstance(result, dict):
+        return [result]
+    return result or []
 
 
-def updateOne(sql: str, params: tuple[Any, ...] = None) -> tuple[Any,] | None:
+def updateOne(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> bool | None:
     return _transact(sql, params, fetchOne=True)
 
 
-def updateMany(sql: str, params: tuple[Any, ...] = None) -> list[tuple[Any,]]:
-    return _transact(sql, params, fetchOne=False) or []
+def updateMany(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> bool | None:
+    return _transact(sql, params, fetchOne=False)

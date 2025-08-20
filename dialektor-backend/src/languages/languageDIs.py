@@ -40,21 +40,21 @@ def selectLanguageByID(id: UUID) -> Language | None:
     return Language(id=result["id"], name=result["name"], script=result["script"])
 
 
-def insertLanguage(name: str, script: str) -> Language:
-    sql = f"""
+def insertLanguage(name: str, script: str) -> Language | None:
+    sql = """
         INSERT INTO languages(id, name, script)
-        VALUES ({slots(3)})
+        VALUES (%s, %s, %s)
         RETURNING id, name, script;
     """
-    result = updateOne(sql, (uuid4(), name, script.upper()))
+    result = queryOne(sql, (uuid4(), name, script.upper()))
     if result is None:
         return None
 
     return Language(id=result["id"], name=result["name"], script=result["script"])
 
 
-def updateLanguage(id: UUID, name: str, script: str) -> Language:
-    sql = f"""
+def updateLanguage(id: UUID, name: str, script: str) -> Language | None:
+    sql = """
         UPDATE languages
         SET
             name = %s,
@@ -62,7 +62,7 @@ def updateLanguage(id: UUID, name: str, script: str) -> Language:
         WHERE id = %s
         RETURNING id, name, script;
     """
-    result = updateOne(sql, (name, script.upper(), id))
+    result = queryOne(sql, (name, script.upper(), id))
     if result is None:
         return None
 
@@ -75,6 +75,6 @@ def deleteLanguage(id: UUID) -> UUID:
         WHERE id = %s
         RETURNING id;
     """
-    updateMany(sql, (id,))
+    queryMany(sql, (id,))
 
     return id

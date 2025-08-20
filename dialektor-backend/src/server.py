@@ -31,7 +31,11 @@ def home():
 
 @app.route("/version")
 def version():
-    return {"version": selectVersion()["version"]}
+    version = selectVersion()
+    if version is None:
+        return {"error": "Version not found"}, 404
+
+    return {"version": version["version"]}
 
 
 @app.errorhandler(BadRequest)

@@ -8,7 +8,13 @@ def generateVersion(id: UUID | None = None, version: UUID | None = None) -> dict
         VALUES(%s, %s)
         RETURNING id, version;
     """
-    return queryOne(sql, (id or uuid4(), version or uuid4()))
+    result = queryOne(sql, (id or uuid4(), version or uuid4()))
+    assert result is not None
+
+    return {
+        "id": result['id'],
+        "version": result['version'],
+    }
 
 
 def generateCountry(id: UUID | None = None, name: UUID | str | None = None) -> dict:
@@ -17,38 +23,60 @@ def generateCountry(id: UUID | None = None, name: UUID | str | None = None) -> d
         VALUES(%s, %s)
         RETURNING id, name;
     """
-    return queryOne(
+    result =  queryOne(
         sql,
         (
             id or uuid4(),
             name or uuid4(),
         ),
     )
+    assert result is not None
 
+    return {
+        "id": result['id'],
+        "name": result['name'],
+    }
+
+def generateScript():
+    pass
 
 def generateLanguage(
     id: UUID | None = None, name: UUID | None = None, script: str | None = None
-):
+) -> dict:
     sql = """
         INSERT INTO languages(id, name, script)
         VALUES(%s, %s, %s)
         RETURNING id, name, script;
     """
-    return queryOne(
+    result = queryOne(
         sql,
         (id or uuid4(), name or uuid4(), script or "LATIN"),
     )
+    assert result is not None
+
+    return {
+        "id": result["id"],
+        "name": result["name"],
+        "script": result["script"],
+    }
 
 
 def generateDialect(
     id: UUID | None = None, name: UUID | None = None, languageId: UUID | None = None
-):
+) -> dict:
     sql = """
         INSERT INTO dialects(id, name, language_id)
         VALUES(%s, %s, %s)
         RETURNING id, name, language_id;
     """
-    return queryOne(
+    result = queryOne(
         sql,
         (id or uuid4(), name or uuid4(), languageId or generateLanguage()["id"]),
     )
+    assert result is not None
+
+    return {
+        "id": result["id"],
+        "name": result["name"],
+        "language_id": result["language_id"],
+    }

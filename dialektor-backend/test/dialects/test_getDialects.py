@@ -35,10 +35,10 @@ def test_getDialects_noDialects_200():
 
 def test_getDialects_ideal_200():
     ids = [
-        str(uuid4()),
-        str(uuid4()),
-        str(uuid4()),
-        str(uuid4()),
+        uuid4(),
+        uuid4(),
+        uuid4(),
+        uuid4(),
     ]
 
     dialects = [
@@ -53,6 +53,6 @@ def test_getDialects_ideal_200():
 
     data = r.json()
     for i in range(4):
-        assert data[i]["id"] == ids[i]
+        assert data[i]["id"] == str(ids[i])
         assert data[i]["name"] == dialects[i]["name"]
         assert data[i]["languageId"] == str(dialects[i]["language_id"])
