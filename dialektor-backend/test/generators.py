@@ -12,8 +12,8 @@ def generateVersion(id: UUID | None = None, version: UUID | None = None) -> dict
     assert result is not None
 
     return {
-        "id": result['id'],
-        "version": result['version'],
+        "id": result["id"],
+        "version": result["version"],
     }
 
 
@@ -23,7 +23,7 @@ def generateCountry(id: UUID | None = None, name: UUID | str | None = None) -> d
         VALUES(%s, %s)
         RETURNING id, name;
     """
-    result =  queryOne(
+    result = queryOne(
         sql,
         (
             id or uuid4(),
@@ -33,12 +33,10 @@ def generateCountry(id: UUID | None = None, name: UUID | str | None = None) -> d
     assert result is not None
 
     return {
-        "id": result['id'],
-        "name": result['name'],
+        "id": result["id"],
+        "name": result["name"],
     }
 
-def generateScript():
-    pass
 
 def generateLanguage(
     id: UUID | None = None, name: UUID | None = None, script: str | None = None

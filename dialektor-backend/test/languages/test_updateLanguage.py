@@ -2,8 +2,9 @@ import requests
 from uuid import uuid4
 from test.generators import generateLanguage
 
+
 def test_updateLanguage_ideal_returnsLanguage():
-    oldLanguage = generateLanguage(script = "LATIN")
+    oldLanguage = generateLanguage(script="LATIN")
 
     r = requests.patch(
         f"http://localhost:3000/languages/{oldLanguage["id"]}",
@@ -17,6 +18,7 @@ def test_updateLanguage_ideal_returnsLanguage():
     data = r.json()
     assert data["name"] != oldLanguage["name"]
     assert data["script"] != oldLanguage["script"]
+
 
 def test_updateLanguage_idDoesntExist_returns404():
     oldLanguage = generateLanguage()
@@ -43,4 +45,3 @@ def test_updateLanguage_emptyBody_returnsOriginalLanguage():
     data = r.json()
     assert data["name"] == oldLanguage["name"]
     assert data["script"] == oldLanguage["script"]
-

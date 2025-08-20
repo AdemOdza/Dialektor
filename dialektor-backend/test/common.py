@@ -22,10 +22,8 @@ def _query(
 ) -> dict | list[dict] | None:
     # Set prepare_threshold to 0 to prepare every statement
 
-    with psycopg.connect(
-        conninfo=connString
-    ) as conn:
-        with conn.cursor(row_factory = dict_row) as cur:
+    with psycopg.connect(conninfo=connString) as conn:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, params=params, prepare=True)
             func = cur.fetchone if fetchOne else cur.fetchall
             return func()
@@ -53,16 +51,20 @@ def _transact(
         return False
 
 
-def queryOne(sql: LiteralString, params: Optional[tuple[Any, ...]] = None) -> Optional[dict]:
+def queryOne(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> Optional[dict]:
     result = _query(sql, params, fetchOne=True)
     if result is None:
         return None
-    
+
     assert isinstance(result, dict)
     return result
 
 
-def queryMany(sql: LiteralString, params: Optional[tuple[Any, ...]] = None) -> list[dict]:
+def queryMany(
+    sql: LiteralString, params: Optional[tuple[Any, ...]] = None
+) -> list[dict]:
     result = _query(sql, params, fetchOne=False)
     assert isinstance(result, list)
     return result

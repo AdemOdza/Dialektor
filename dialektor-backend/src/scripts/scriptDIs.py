@@ -1,4 +1,4 @@
-from common.database import queryMany, updateMany, updateOne
+from common.database import queryMany, updateMany, queryOne
 from scripts import Script
 
 
@@ -20,7 +20,7 @@ def deleteScript(name: str):
     updateMany(sql, (name,))
 
 
-def insertScript(name: str) -> str:
+def insertScript(name: str) -> Script | None:
     sql = """
         INSERT INTO 
             scripts(name) 
@@ -28,5 +28,8 @@ def insertScript(name: str) -> str:
             (%s)
         RETURNING name;
     """
-    result = updateOne(sql, (name,))
+    result = queryOne(sql, (name,))
+    if result is None:
+        return None
+
     return Script(name=result["name"])

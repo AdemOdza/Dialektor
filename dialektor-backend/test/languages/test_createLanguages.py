@@ -1,5 +1,6 @@
 import requests
 from uuid import UUID
+
 # from test.generators import generateScript
 
 
@@ -31,6 +32,7 @@ def test_createLanguage_emptyBody_badRequest():
     data = r.json()
     assert data["error"] == "Missing Body"
 
+
 def test_createLanguage_noBody_badRequest():
     r = requests.post(
         f"http://localhost:3000/languages/",
@@ -40,12 +42,11 @@ def test_createLanguage_noBody_badRequest():
     data = r.json()
     assert data["error"] == "Bad Request"
 
+
 def test_createLanguage_noName_badRequest():
     r = requests.post(
         f"http://localhost:3000/languages/",
-        json={
-            "script": "LATIN"
-        },
+        json={"script": "LATIN"},
     )
     assert r.status_code == 400
 
@@ -56,9 +57,7 @@ def test_createLanguage_noName_badRequest():
 def test_createLanguage_noScript_badRequest():
     r = requests.post(
         f"http://localhost:3000/languages/",
-        json={
-            "name": "testLang"
-        },
+        json={"name": "testLang"},
     )
     assert r.status_code == 400
 
@@ -69,10 +68,7 @@ def test_createLanguage_noScript_badRequest():
 def test_createLanguage_invalidScript_badRequest():
     r = requests.post(
         f"http://localhost:3000/languages/",
-        json={
-            "name": "GALACTIC_BASIC_STANDARD",
-            "script": "AUREBESH"
-        },
+        json={"name": "GALACTIC_BASIC_STANDARD", "script": "AUREBESH"},
     )
     assert r.status_code == 400
 
