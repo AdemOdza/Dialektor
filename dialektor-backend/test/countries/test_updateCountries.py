@@ -25,6 +25,7 @@ def test_updateCountry_ideal_returnsCountry_200():
     """,
         (oldCountry["id"],),
     )
+    assert dbResult is not None
     assert dbResult["name"] == "newCountry"
 
 
@@ -46,6 +47,7 @@ def test_updateCountry_noName_returnsCountryIdempotent_200():
     """,
         (oldCountry["id"],),
     )
+    assert dbResult is not None
     assert dbResult["name"] == oldCountry["name"]
 
 

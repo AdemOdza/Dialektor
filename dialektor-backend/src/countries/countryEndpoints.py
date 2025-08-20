@@ -36,7 +36,7 @@ def createCountry(body: dict):
         return countryDIs.insertCountry(body["name"]).toJson()
     except Exception as e:
         print(
-            f"Error inserting country into database: {e.message if hasattr(e, 'message') else e}",
+            f"Error inserting country into database: {str(e)}",
             flush=True,
         )
         return {"error": "Internal Server Error"}, 500
@@ -44,15 +44,16 @@ def createCountry(body: dict):
 
 @countryRouter.route("/<id>", methods=("GET", "PATCH", "DELETE"))
 def countryByIdResource(id: UUID):
-    if request.method == "DELETE":
-        return deleteCountry(id)
-
     existingCountry = countryDIs.selectCountryByID(id)
-    if existingCountry is None:
-        return toJson({"error": f"Country with ID {id} not found."}), 404
+    if request.method == "DELETE":
+        if existingCountry is not None:
+            deleteCountry(id)
+        return {"id": id}
 
     if request.method == "GET":
-        return getCountry(id)
+        if existingCountry is None:
+            return toJson({"error": f"Country with ID {id} not found."}), 404
+        return existingCountry.toJson()
     elif request.method == "PATCH":
         body = request.get_json(force=True)
         return updateCountry(id, body)
@@ -60,11 +61,11 @@ def countryByIdResource(id: UUID):
     return {"error": "Not Implemented"}, 501
 
 
-def getCountry(id: UUID):
-    country = countryDIs.selectCountryByID(id)
-    if country is None:
-        return toJson({"error": f"Country with ID {id} not found."}), 404
-    return country.toJson()
+# def getCountry(id: UUID):
+#     country = countryDIs.selectCountryByID(id)
+#     if country is None:
+#         return toJson({"error": f"Country with ID {id} not found."}), 404
+#     return country.toJson()
 
 
 def updateCountry(id: UUID, body: dict):
@@ -77,7 +78,7 @@ def updateCountry(id: UUID, body: dict):
         return result.toJson(), 200
     except Exception as e:
         print(
-            f"Error updating country: {e.message if hasattr(e, 'message') else e}",
+            f"Error updating country: {str(e)}",
             flush=True,
         )
         return {"error": "Internal Server Error"}, 500
@@ -86,13 +87,11 @@ def updateCountry(id: UUID, body: dict):
 def deleteCountry(id: UUID):
     try:
         countryDIs.deleteCountry(id)
-        return {"id": id}, 200
     except Exception as e:
         print(
-            f"Error deleting country: {e.message if hasattr(e, 'message') else e}",
+            f"Error deleting country: {str(e)}",
             flush=True,
         )
-        return {"error": "Internal Server Error"}, 500
 
 
 @countryRouter.route("/<countryId>/regions", methods=("GET", "POST"))
@@ -131,6 +130,11 @@ def countryRegionResource(countryId: UUID, regionId: UUID):
         return {"error": f"Country with ID {countryId} not found."}, 404
 
     region = regionDIs.selectRegionById(regionId)
+    if request.method == "DELETE":
+        if region is not None:
+            regionDIs.deleteRegion(regionId)
+        return {"countryId": countryId, "regionId": regionId}
+
     if region is None or str(country.id) != str(region.country):
         return {
             "error": f"Region with ID {regionId} not found for country {countryId}."
@@ -141,15 +145,14 @@ def countryRegionResource(countryId: UUID, regionId: UUID):
     elif request.method == "PATCH":
         body = request.get_json(force=True)
         return updateCountryRegion(countryId, regionId, body)
-    elif request.method == "DELETE":
-        regionDIs.deleteRegion(regionId)
-        return region.toJson()
 
     return {"error": "Not Implemented"}, 501
 
 
-def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict) -> Region:
+def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict):
     region = regionDIs.selectRegionById(regionId)
+    if region is None:
+        return {"error": f"Region with ID {regionId} not found."}, 404
 
     result = regionDIs.updateRegion(
         regionId=regionId, countryId=countryId, name=body.get("name", region.name)

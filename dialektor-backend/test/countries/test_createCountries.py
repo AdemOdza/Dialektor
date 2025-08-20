@@ -21,6 +21,7 @@ def test_createCountry_ideal_200():
     """,
         (data["id"],),
     )
+    assert dbResult is not None
     assert dbResult["name"] == "newCountry"
 
 

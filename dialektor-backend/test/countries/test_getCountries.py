@@ -34,10 +34,10 @@ def test_getCountries_noCountries_200():
 
 def test_getCountries_ideal_200():
     ids = [
-        str(uuid4()),
-        str(uuid4()),
-        str(uuid4()),
-        str(uuid4()),
+        uuid4(),
+        uuid4(),
+        uuid4(),
+        uuid4(),
     ]
 
     names = [
@@ -52,5 +52,5 @@ def test_getCountries_ideal_200():
 
     data = r.json()
     for i in range(4):
-        assert data[i]["id"] == ids[i]
+        assert data[i]["id"] == str(ids[i])
         assert data[i]["name"] == names[i]
