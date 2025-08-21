@@ -33,7 +33,11 @@ def createCountry(body: dict):
         return {"error": 'Error creating country: "name" field missing'}, 400
 
     try:
-        return countryDIs.insertCountry(body["name"]).toJson()
+        result = countryDIs.insertCountry(body["name"])
+        if result is None:
+            raise Exception("Error inserting country")
+
+        return result.toJson()
     except Exception as e:
         print(
             f"Error inserting country into database: {str(e)}",
@@ -75,6 +79,9 @@ def updateCountry(id: UUID, body: dict):
 
     try:
         result = countryDIs.updateCountry(id, body.get("name", country.name))
+        if result is None:
+            raise Exception("Error updating country")
+
         return result.toJson(), 200
     except Exception as e:
         print(
@@ -118,7 +125,11 @@ def createCountryRegion(countryId: UUID, body: dict):
     if body.get("name") is None:
         return {"error": 'Missing required field "name".'}, 400
 
-    return regionDIs.insertRegion(countryId=countryId, name=body["name"]).toJson()
+    result = regionDIs.insertRegion(countryId=countryId, name=body["name"])
+    if result is None:
+        return {"error": "Error adding region to country"}, 500
+
+    return result.toJson()
 
 
 @countryRouter.route(
@@ -132,7 +143,11 @@ def countryRegionResource(countryId: UUID, regionId: UUID):
     region = regionDIs.selectRegionById(regionId)
     if request.method == "DELETE":
         if region is not None:
-            regionDIs.deleteRegion(regionId)
+            if regionDIs.deleteRegion(regionId) is None:
+                print(
+                    f"Error deleting region {regionId} from country {countryId}",
+                    flush=True,
+                )
         return {"countryId": countryId, "regionId": regionId}
 
     if region is None or str(country.id) != str(region.country):
@@ -157,4 +172,7 @@ def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict):
     result = regionDIs.updateRegion(
         regionId=regionId, countryId=countryId, name=body.get("name", region.name)
     )
+    if result is None:
+        return {"error": "Error updating country region"}, 500
+
     return toJson(result)

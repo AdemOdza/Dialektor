@@ -3,14 +3,14 @@ from dialects import Dialect
 from common.database import queryMany, queryOne, updateOne, slots
 
 
-def insertDialect(languageId: UUID, name: str) -> Dialect:
-    sql = f"""
+def insertDialect(languageId: UUID, name: str) -> Dialect | None:
+    sql = """
         INSERT INTO dialects(id, language_id, name)
-        VALUES ({slots(3)})
+        VALUES (%s, %s, %s)
         RETURNING id, language_id, name;
     """
 
-    result = updateOne(
+    result = queryOne(
         sql,
         (
             uuid4(),
@@ -18,6 +18,8 @@ def insertDialect(languageId: UUID, name: str) -> Dialect:
             name,
         ),
     )
+    if result is None:
+        return None
 
     return Dialect(
         id=result["id"], languageId=result["language_id"], name=result["name"]
@@ -74,16 +76,16 @@ def selectDialectsByLanguage(languageId: UUID) -> list[Dialect]:
     ]
 
 
-def updateDialect(id: UUID, languageId: UUID, name: str) -> Dialect:
+def updateDialect(id: UUID, languageId: UUID, name: str) -> Dialect | None:
     # ID and Language ID composite key. Name should be the only thing that changes
-    sql = f"""
+    sql = """
         UPDATE dialects
         SET name = %s
         WHERE id = %s AND language_id = %s
         RETURNING id, language_id, name;
     """
 
-    result = updateOne(
+    result = queryOne(
         sql,
         (
             name,
@@ -91,26 +93,30 @@ def updateDialect(id: UUID, languageId: UUID, name: str) -> Dialect:
             languageId,
         ),
     )
+    if result is None:
+        return None
 
     return Dialect(
         id=result["id"], languageId=result["language_id"], name=result["name"]
     )
 
 
-def deleteDialect(id: UUID, languageId: UUID) -> UUID:
+def deleteDialect(id: UUID, languageId: UUID) -> Dialect | None:
     sql = """
         DELETE FROM dialects
         WHERE id = %s AND language_id = %s
         RETURNING id, language_id, name;
     """
 
-    result = updateOne(
+    result = queryOne(
         sql,
         (
             id,
             languageId,
         ),
     )
+    if result is None:
+        return None
 
     return Dialect(
         id=result["id"], languageId=result["language_id"], name=result["name"]

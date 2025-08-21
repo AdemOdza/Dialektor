@@ -115,7 +115,10 @@ def createLanguageDialect(languageId: UUID, body: dict):
     if body.get("name") is None:
         return {"error": 'Missing required field: "name"'}, 400
 
-    return dialectDIs.insertDialect(languageId, body["name"]).toJson()
+    result = dialectDIs.insertDialect(languageId, body["name"])
+    if result is None:
+        return {"error": "Error creating dialect"}, 500
+    return result.toJson()
 
 
 @languageRouter.route(
@@ -132,7 +135,10 @@ def languageDialectResource(languageId: UUID, dialectId: UUID):
             return {"error": "Missing Body"}, 400
         return updateLanguageDialect(languageId, dialectId, body)
     elif request.method == "DELETE":
-        return toJson(dialectDIs.deleteDialect(dialectId, languageId))
+        result = dialectDIs.deleteDialect(dialectId, languageId)
+        if result is None:
+            print("Error deleting dialect", flush=True)
+        return {"id": dialectId, "languageId": languageId}
     elif request.method == "GET":
         result = dialectDIs.selectDialectById(dialectId)
         if result is None or str(result.languageId) != str(languageId):
@@ -148,6 +154,10 @@ def updateLanguageDialect(languageId: UUID, dialectId: UUID, body: dict):
     if oldDialect is None or str(oldDialect.languageId) != str(languageId):
         return {"error": f"Dialect not found"}, 404
 
-    return dialectDIs.updateDialect(
+    result = dialectDIs.updateDialect(
         dialectId, languageId, body.get("name", oldDialect.name)
-    ).toJson()
+    )
+    if result is None:
+        return {"error", "Error updating dialect"}, 500
+
+    return result.toJson()

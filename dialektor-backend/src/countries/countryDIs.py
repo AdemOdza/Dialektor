@@ -3,10 +3,10 @@ from countries import Country
 from uuid import UUID, uuid4
 
 
-def insertCountry(name: str) -> Country:
-    sql = f"""
+def insertCountry(name: str) -> Country | None:
+    sql = """
         INSERT INTO countries(id, name)
-        VALUES ({slots(2)})
+        VALUES (%s, %s)
         RETURNING id, name;
     """
     result = queryOne(
@@ -16,6 +16,8 @@ def insertCountry(name: str) -> Country:
             name,
         ),
     )
+    if result is None:
+        return None
 
     return Country(id=result["id"], name=result["name"])
 
@@ -26,7 +28,6 @@ def selectCountries() -> list[Country]:
 
 
 def selectCountryByID(id: UUID) -> Country | None:
-    print(f"TESTING ID: ${id}")
     sql = """
         SELECT *
         FROM countries
@@ -39,7 +40,7 @@ def selectCountryByID(id: UUID) -> Country | None:
     return Country(id=result["id"], name=result["name"])
 
 
-def updateCountry(id: UUID, name: str) -> Country:
+def updateCountry(id: UUID, name: str) -> Country | None:
     sql = f"""
         UPDATE 
             countries
@@ -51,6 +52,8 @@ def updateCountry(id: UUID, name: str) -> Country:
             id, name;
     """
     result = queryOne(sql, (name, id))
+    if result is None:
+        return None
 
     return Country(id=result["id"], name=result["name"])
 
@@ -62,3 +65,5 @@ def deleteCountry(id: UUID) -> UUID:
         RETURNING id;
     """
     updateMany(sql, (id,))
+
+    return id
