@@ -62,13 +62,16 @@ def selectRegionsByCountryId(countryId: UUID) -> list[Region]:
     ]
 
 
-def insertRegion(countryId: UUID, name: str):
-    sql = f"""
+def insertRegion(countryId: UUID, name: str) -> Region | None:
+    sql = """
         INSERT INTO regions(id, country, name)
-        VALUES ({slots(3)})
+        VALUES (%s, %s, %s)
         RETURNING id, country, name;
     """
-    result = updateOne(sql, (uuid4(), countryId, name))
+    result = queryOne(sql, (uuid4(), countryId, name))
+
+    if result is None:
+        return None
 
     return Region(
         id=result["id"],
@@ -77,7 +80,7 @@ def insertRegion(countryId: UUID, name: str):
     )
 
 
-def updateRegion(regionId: UUID, countryId: UUID, name: str):
+def updateRegion(regionId: UUID, countryId: UUID, name: str) -> list[Region] | None:
     sql = """
         UPDATE regions
         SET
@@ -86,7 +89,10 @@ def updateRegion(regionId: UUID, countryId: UUID, name: str):
         WHERE id = %s
         RETURNING id, country, name;
     """
-    result = updateMany(sql, (countryId, name, regionId))
+    result = queryMany(sql, (countryId, name, regionId))
+    if result is None:
+        return None
+
     return [
         *map(
             lambda row: Region(id=row["id"], name=row["name"], country=row["country"]),
@@ -95,13 +101,16 @@ def updateRegion(regionId: UUID, countryId: UUID, name: str):
     ]
 
 
-def deleteRegion(regionId: UUID):
+def deleteRegion(regionId: UUID) -> Region | None:
     sql = """
         DELETE FROM regions
         WHERE id = %s
         RETURNING id, country, name;
     """
-    result = updateOne(sql, (regionId,))
+    result = queryOne(sql, (regionId,))
+    if result is None:
+        return None
+
     return Region(
         id=result["id"],
         country=result["country"],

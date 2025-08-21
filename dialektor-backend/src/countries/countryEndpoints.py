@@ -19,7 +19,12 @@ def countriesResource():
 
 def getCountries():
     countries = countryDIs.selectCountries()
-    result = [*map(lambda country: {"id": country.id, "name": country.name}, countries)]
+    result = [
+        *map(
+            lambda country: {"id": toJson(country.id), "name": toJson(country.name)},
+            countries,
+        )
+    ]
     return toJson(result)
 
 
@@ -28,10 +33,14 @@ def createCountry(body: dict):
         return {"error": 'Error creating country: "name" field missing'}, 400
 
     try:
-        return countryDIs.insertCountry(body["name"]).toJson()
+        result = countryDIs.insertCountry(body["name"])
+        if result is None:
+            raise Exception("Error inserting country")
+
+        return result.toJson()
     except Exception as e:
         print(
-            f"Error inserting country into database: {e.message if hasattr(e, 'message') else e}",
+            f"Error inserting country into database: {str(e)}",
             flush=True,
         )
         return {"error": "Internal Server Error"}, 500
@@ -39,40 +48,44 @@ def createCountry(body: dict):
 
 @countryRouter.route("/<id>", methods=("GET", "PATCH", "DELETE"))
 def countryByIdResource(id: UUID):
+    existingCountry = countryDIs.selectCountryByID(id)
+    if request.method == "DELETE":
+        if existingCountry is not None:
+            deleteCountry(id)
+        return {"id": id}
+
     if request.method == "GET":
-        return getCountry(id)
+        if existingCountry is None:
+            return toJson({"error": f"Country with ID {id} not found."}), 404
+        return existingCountry.toJson()
     elif request.method == "PATCH":
         body = request.get_json(force=True)
-
-        if body.get("name") is None:
-            return {"error": 'Error creating country: "name" field missing'}, 400
-
         return updateCountry(id, body)
-    elif request.method == "DELETE":
-        return deleteCountry(id)
 
     return {"error": "Not Implemented"}, 501
 
 
-def getCountry(id: UUID):
-    country = countryDIs.selectCountryByID(id)
-    if country is None:
-        return {"error": f"Country with ID {id} not found."}, 404
-
-    return {"id": country.id, "name": country.name}
+# def getCountry(id: UUID):
+#     country = countryDIs.selectCountryByID(id)
+#     if country is None:
+#         return toJson({"error": f"Country with ID {id} not found."}), 404
+#     return country.toJson()
 
 
 def updateCountry(id: UUID, body: dict):
     country = countryDIs.selectCountryByID(id)
     if country is None:
-        return {"error": f"Country with ID {id} not found."}, 404
+        return {"error": f"Error updating: country with ID {id} not found."}, 404
 
     try:
-        result = countryDIs.updateCountry(id, body.get("name"))
+        result = countryDIs.updateCountry(id, body.get("name", country.name))
+        if result is None:
+            raise Exception("Error updating country")
+
         return result.toJson(), 200
     except Exception as e:
         print(
-            f"Error updating country: {e.message if hasattr(e, 'message') else e}",
+            f"Error updating country: {str(e)}",
             flush=True,
         )
         return {"error": "Internal Server Error"}, 500
@@ -81,13 +94,11 @@ def updateCountry(id: UUID, body: dict):
 def deleteCountry(id: UUID):
     try:
         countryDIs.deleteCountry(id)
-        return {"id": id}, 200
     except Exception as e:
         print(
-            f"Error deleting country: {e.message if hasattr(e, 'message') else e}",
+            f"Error deleting country: {str(e)}",
             flush=True,
         )
-        return {"error": "Internal Server Error"}, 500
 
 
 @countryRouter.route("/<countryId>/regions", methods=("GET", "POST"))
@@ -114,7 +125,11 @@ def createCountryRegion(countryId: UUID, body: dict):
     if body.get("name") is None:
         return {"error": 'Missing required field "name".'}, 400
 
-    return regionDIs.insertRegion(countryId=countryId, name=body["name"]).toJson()
+    result = regionDIs.insertRegion(countryId=countryId, name=body["name"])
+    if result is None:
+        return {"error": "Error adding region to country"}, 500
+
+    return result.toJson()
 
 
 @countryRouter.route(
@@ -126,6 +141,15 @@ def countryRegionResource(countryId: UUID, regionId: UUID):
         return {"error": f"Country with ID {countryId} not found."}, 404
 
     region = regionDIs.selectRegionById(regionId)
+    if request.method == "DELETE":
+        if region is not None:
+            if regionDIs.deleteRegion(regionId) is None:
+                print(
+                    f"Error deleting region {regionId} from country {countryId}",
+                    flush=True,
+                )
+        return {"countryId": countryId, "regionId": regionId}
+
     if region is None or str(country.id) != str(region.country):
         return {
             "error": f"Region with ID {regionId} not found for country {countryId}."
@@ -136,17 +160,19 @@ def countryRegionResource(countryId: UUID, regionId: UUID):
     elif request.method == "PATCH":
         body = request.get_json(force=True)
         return updateCountryRegion(countryId, regionId, body)
-    elif request.method == "DELETE":
-        regionDIs.deleteRegion(regionId)
-        return region.toJson()
 
     return {"error": "Not Implemented"}, 501
 
 
-def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict) -> Region:
+def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict):
     region = regionDIs.selectRegionById(regionId)
+    if region is None:
+        return {"error": f"Region with ID {regionId} not found."}, 404
 
     result = regionDIs.updateRegion(
         regionId=regionId, countryId=countryId, name=body.get("name", region.name)
     )
+    if result is None:
+        return {"error": "Error updating country region"}, 500
+
     return toJson(result)

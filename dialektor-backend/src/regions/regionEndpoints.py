@@ -21,5 +21,5 @@ def regionByIdResource(id: UUID):
         return {"error": f"Region {id} not found."}, 404
 
     if request.method == "GET":
-        return regionDIs.selectRegionById(id).toJson()
+        return toJson(region)
     return {"error": "Not Implemented"}, 501

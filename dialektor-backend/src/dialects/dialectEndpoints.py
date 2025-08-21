@@ -18,6 +18,6 @@ def getDialect(id: UUID):
     dialect = dialectDIs.selectDialectById(id)
 
     if dialect is None:
-        {"error": f"Dialect with ID {id} not found."}, 404
+        return {"error": f"Dialect with ID {id} not found."}, 404
 
     return dialect.toJson()
