@@ -38,6 +38,23 @@ def generateCountry(id: UUID | None = None, name: UUID | str | None = None) -> d
     }
 
 
+def generateRegion(
+    id: UUID | None = None, name: UUID | str | None = None, country: UUID | None = None
+) -> dict:
+    sql = """
+        INSERT INTO regions(id, name, country)
+        VALUES(%s, %s, %s)
+        RETURNING id, name, country;
+    """
+    result = queryOne(
+        sql,
+        (id or uuid4(), name or uuid4(), country or generateCountry()["id"]),
+    )
+    assert result is not None
+
+    return {"id": result["id"], "name": result["name"], "country": result["country"]}
+
+
 def generateLanguage(
     id: UUID | None = None, name: UUID | None = None, script: str | None = None
 ) -> dict:

@@ -59,4 +59,4 @@ def test_updateCountry_idDoesntExist_returnsError_404():
     assert r.status_code == 404
 
     data = r.json()
-    assert data["error"] == f"Country with ID {dummyId} not found."
+    assert data["error"] == f"Error updating: country with ID {dummyId} not found."
