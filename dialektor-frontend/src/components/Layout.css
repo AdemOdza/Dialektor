@@ -1,0 +1,12 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fafaf8 0%, #f0ede5 100%);
+}
+
+.main-content {
+  margin-left: 260px;
+  flex: 1;
+  padding: 2rem;
+  min-height: 100vh;
+}
