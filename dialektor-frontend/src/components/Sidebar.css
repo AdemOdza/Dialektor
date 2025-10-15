@@ -58,6 +58,10 @@
   padding: 0;
 }
 
+.sidebar-nav li {
+  margin: 0.25rem 0.75rem;
+}
+
 .nav-item {
   padding: 0.875rem 1.5rem;
   display: flex;
@@ -67,8 +71,8 @@
   transition: all 0.2s ease;
   color: #5a4d3d;
   font-weight: 500;
-  margin: 0.25rem 0.75rem;
   border-radius: 8px;
+  text-decoration: none;
 }
 
 .nav-item:hover {
