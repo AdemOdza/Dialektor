@@ -1,5 +1,5 @@
 from uuid import UUID
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from common import toJson
 from regions import regionDIs
 
@@ -21,5 +21,5 @@ def regionByIdResource(id: UUID):
         return {"error": f"Region {id} not found."}, 404
 
     if request.method == "GET":
-        return toJson(region)
+        return jsonify(region.toJson())
     return {"error": "Not Implemented"}, 501

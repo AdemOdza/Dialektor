@@ -1,8 +1,9 @@
 from typing import get_args
 from uuid import UUID
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from languages import validScripts, languageDIs
 from dialects import dialectDIs
+from baseWords import BaseWord, baseWordDIs
 from common import toJson
 
 languageRouter = Blueprint("languages", __name__, url_prefix="/languages")
@@ -127,7 +128,7 @@ def createLanguageDialect(languageId: UUID, body: dict):
 def languageDialectResource(languageId: UUID, dialectId: UUID):
     lang = languageDIs.selectLanguageByID(languageId)
     if lang is None:
-        return {"error": f"Language not found"}, 404
+        return {"error": "Language not found"}, 404
 
     if request.method == "PATCH":
         body = request.get_json(force=True)
@@ -144,7 +145,7 @@ def languageDialectResource(languageId: UUID, dialectId: UUID):
         if result is None or str(result.languageId) != str(languageId):
             return {"error": f"Dialect not found"}, 404
 
-        return result.toJson()
+        return jsonify(result.toJson())
     return {"error": "Not Implemented"}, 501
 
 
@@ -158,6 +159,101 @@ def updateLanguageDialect(languageId: UUID, dialectId: UUID, body: dict):
         dialectId, languageId, body.get("name", oldDialect.name)
     )
     if result is None:
-        return {"error", "Error updating dialect"}, 500
+        return {"error": "Error updating dialect"}, 500
 
-    return result.toJson()
+    return jsonify(result), 200
+
+
+@languageRouter.route("/<languageId>/base_words/", methods=("POST", "GET"))
+def languageBaseWordsResource(languageId: UUID):
+    lang = languageDIs.selectLanguageByID(languageId)
+    if lang is None:
+        return {"error": "Language not found"}, 404
+
+    if request.method == "GET":
+        return getBaseWordsForLanguage(languageId)
+    elif request.method == "POST":
+        body = request.get_json(force=True)
+        return createBaseWordForLanguage(languageId, body)
+    return {"error": "Not Implemented"}, 501
+
+
+def createBaseWordForLanguage(languageId: UUID, body: dict):
+    errors: list[str] = []
+    if body.get("word") is None:
+        errors.append("word")
+
+    if len(errors) > 0:
+        return {
+            "error": f'Missing required field{"s" if len(errors) > 1 else ""}: {", ".join(errors)}'
+        }, 400
+
+    try:
+        result = baseWordDIs.insertBaseWord(
+            body["word"],
+            languageId,
+        )
+
+        if result is None:
+            raise Exception(f"Error inserting base word for language {languageId}")
+
+        return jsonify(result.toJson()), 200
+    except Exception as e:
+        print(
+            f"Error inserting base word into database: {str(e)}",
+            flush=True,
+        )
+        return {"error": "Internal Server Error"}, 500
+
+
+def getBaseWordsForLanguage(languageId: UUID):
+    result = baseWordDIs.selectBaseWordsByLanguage(languageId)
+    return jsonify(
+        [
+            *map(
+                lambda baseWord: baseWord.toJson(),
+                result,
+            )
+        ]
+    )
+
+
+@languageRouter.route(
+    "/<languageId>/base_words/<baseWordId>", methods=("PATCH", "DELETE", "GET")
+)
+def languageBaseWordResource(languageId: UUID, baseWordId: UUID):
+    lang = languageDIs.selectLanguageByID(languageId)
+    if lang is None:
+        return {"error": "Language not found"}, 404
+
+    word = baseWordDIs.selectBaseWordByLanguage(baseWordId, languageId)
+    if word is None:
+        return {
+            "error": f"Base word {baseWordId} not associated with language {languageId}"
+        }, 404
+
+    if request.method == "PATCH":
+        body = request.get_json(force=True)
+        if body is None:
+            return {"error": "Missing Body"}, 400
+        return updateLanguageBaseWord(languageId, baseWordId, word, body)
+    elif request.method == "DELETE":
+        result = baseWordDIs.deleteBaseWord(word.id)
+        if result is None:
+            print("Error deleting base word from language", flush=True)
+        return {"baseWordId": baseWordId, "languageId": languageId}
+    elif request.method == "GET":
+        return jsonify(word.toJson())
+    return {"error": "Not Implemented"}, 501
+
+
+def updateLanguageBaseWord(
+    languageId: UUID, baseWordId: UUID, currentWord: BaseWord, body: dict
+):
+    result = baseWordDIs.updateBaseWord(
+        id=baseWordId, languageId=languageId, word=body.get("word") or currentWord.word
+    )
+    if result is None:
+        return {"error": "Error updating dialect"}, 500
+
+    return jsonify(result), 200

@@ -1,5 +1,5 @@
 from uuid import UUID
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from common import toJson
 from countries import countryDIs
 from regions import Region, regionDIs
@@ -25,7 +25,7 @@ def getCountries():
             countries,
         )
     ]
-    return toJson(result)
+    return jsonify(toJson(result))
 
 
 def createCountry(body: dict):
@@ -56,8 +56,8 @@ def countryByIdResource(id: UUID):
 
     if request.method == "GET":
         if existingCountry is None:
-            return toJson({"error": f"Country with ID {id} not found."}), 404
-        return existingCountry.toJson()
+            return {"error": f"Country with ID {id} not found."}, 404
+        return jsonify(existingCountry.toJson())
     elif request.method == "PATCH":
         body = request.get_json(force=True)
         return updateCountry(id, body)
@@ -82,7 +82,7 @@ def updateCountry(id: UUID, body: dict):
         if result is None:
             raise Exception("Error updating country")
 
-        return result.toJson(), 200
+        return jsonify(result.toJson()), 200
     except Exception as e:
         print(
             f"Error updating country: {str(e)}",
@@ -175,4 +175,4 @@ def updateCountryRegion(countryId: UUID, regionId: UUID, body: dict):
     if result is None:
         return {"error": "Error updating country region"}, 500
 
-    return toJson(result)
+    return jsonify(toJson(result))

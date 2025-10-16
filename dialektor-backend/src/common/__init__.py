@@ -1,16 +1,20 @@
 import datetime
 import os
 import dataclasses
+from typing import Optional
 from uuid import UUID
 
 
-def getEnv(key: str, default: str = None):
+def getEnv(key: str, default: Optional[str] = None):
     return os.environ.get(key, default)
 
 
 def toJson(val):
     if dataclasses.is_dataclass(val):
-        return val.toJson()
+        # If the dataclass instance has a toJson method, use it
+        if hasattr(val, "toJson") and callable(getattr(val, "toJson")):
+            return val.toJson()  # type: ignore
+        raise Exception("toJson not implemented in dataclass.")
 
     match val:
         case datetime.datetime():
