@@ -56,7 +56,7 @@ def generateRegion(
 
 
 def generateLanguage(
-    id: UUID | None = None, name: UUID | None = None, script: str | None = None
+    id: UUID | None = None, name: str | None = None, script: str | None = None
 ) -> dict:
     sql = """
         INSERT INTO languages(id, name, script)
@@ -93,5 +93,26 @@ def generateDialect(
     return {
         "id": result["id"],
         "name": result["name"],
+        "language_id": result["language_id"],
+    }
+
+
+def generateBaseWord(
+    id: UUID | None = None, word: str | None = None, languageId: UUID | None = None
+) -> dict:
+    sql = """
+        INSERT INTO base_words(id, word, language_id)
+        VALUES(%s, %s, %s)
+        RETURNING id, word, language_id;
+    """
+    result = queryOne(
+        sql,
+        (id or uuid4(), word or str(uuid4()), languageId or generateLanguage()["id"]),
+    )
+    assert result is not None
+
+    return {
+        "id": result["id"],
+        "word": result["word"],
         "language_id": result["language_id"],
     }

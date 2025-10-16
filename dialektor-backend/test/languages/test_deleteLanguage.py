@@ -1,5 +1,6 @@
 import requests
 from uuid import uuid4
+from test.common import queryOne
 from test.generators import generateLanguage
 
 
@@ -14,6 +15,17 @@ def test_deleteLanguage_ideal_returnsId_200():
     data = r.json()
     assert data["id"] == str(oldLanguage["id"])
 
+    # Check database
+    dbResult = queryOne(
+        """
+        SELECT *
+        FROM languages
+        WHERE id = %s;
+    """,
+        (oldLanguage["id"],),
+    )
+    assert dbResult is None
+
 
 def test_deleteLanguage_languageDoesntExist_returnsId_200():
     dummyId = uuid4()
@@ -24,3 +36,14 @@ def test_deleteLanguage_languageDoesntExist_returnsId_200():
 
     data = r.json()
     assert data["id"] == str(dummyId)
+
+    # Check database
+    dbResult = queryOne(
+        """
+        SELECT *
+        FROM languages
+        WHERE id = %s;
+    """,
+        (dummyId,),
+    )
+    assert dbResult is None
