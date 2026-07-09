@@ -24,7 +24,7 @@ def test_getDialect_ideal_200():
     assert data["languageId"] == str(dialect["language_id"])
 
 
-# Get all countries
+# Get all dialects
 def test_getDialects_noDialects_200():
     r = requests.get(f"http://localhost:3000/dialects/")
     assert r.status_code == 200
