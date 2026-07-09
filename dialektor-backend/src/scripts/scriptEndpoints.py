@@ -9,9 +9,9 @@ scriptRouter = Blueprint("scripts", __name__, url_prefix="/scripts")
 def scriptResource():
     if request.method == "GET":
         return getScripts()
-    # elif request.method == "POST":
-    #     body = request.get_json(force=True)
-    #     return createScript(body)
+    elif request.method == "POST":
+        body = request.get_json(force=True)
+        return createScript(body)
     return {"error": "Not Implemented"}, 501
 
 
@@ -20,28 +20,32 @@ def getScripts():
     return [*map(lambda s: s.toJson(), result)]
 
 
-# def createScript(body: dict):
-#     if body.get("name") is None:
-#         return {"error": 'Error creating script: "name" field missing'}, 400
+def createScript(body: dict):
+    if body.get("name") is None:
+        return {"error": 'Error creating script: "name" field missing'}, 400
 
-#     try:
-#         return toJson(scriptDIs.insertScript(body["name"]))
-#     except Exception as e:
-#         print(
-#             f"Error inserting script into database: {str(e)}",
-#             flush=True,
-#         )
-#         return {"error": "Internal Server Error"}, 500
+    try:
+        result = scriptDIs.insertScript(body["name"])
+        if result is None:
+            raise Exception("Error inserting script")
+
+        return result.toJson()
+    except Exception as e:
+        print(
+            f"Error inserting script into database: {str(e)}",
+            flush=True,
+        )
+        return {"error": "Internal Server Error"}, 500
 
 
-# @scriptRouter.delete("/<name>")
-# def deleteScript(name: str):
-#     try:
-#         scriptDIs.deleteScript(name)
-#         return {"name": name}
-#     except Exception as e:
-#         print(
-#             f"Error deleting script: {str(e)}",
-#             flush=True,
-#         )
-#         return {"error": "Internal Server Error"}, 500
+@scriptRouter.delete("/<name>")
+def deleteScript(name: str):
+    try:
+        scriptDIs.deleteScript(name)
+        return {"name": name}
+    except Exception as e:
+        print(
+            f"Error deleting script: {str(e)}",
+            flush=True,
+        )
+        return {"error": "Internal Server Error"}, 500

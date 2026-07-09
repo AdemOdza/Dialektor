@@ -61,14 +61,15 @@ def createBaseWord(body: dict):
 @baseWordRouter.route("/<id>", methods=("GET", "DELETE", "PATCH"))
 def baseWordIdResource(id: UUID):
     baseWord = baseWordDIs.selectBaseWord(id)
+    if request.method == "DELETE":
+        return deleteBaseWord(id)
+
     if baseWord is None:
         return {"error": f"Base Word {id} not found."}, 404
 
     match request.method:
         case "GET":
             return jsonify(baseWord.toJson()), 200
-        case "DELETE":
-            return deleteBaseWord(id)
         case "PATCH":
             body = request.get_json(force=True)
             return updateBaseWord(id, body)

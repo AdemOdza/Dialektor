@@ -3,7 +3,7 @@ from test.generators import generateBaseWord
 from uuid import uuid4
 
 
-def updateBaseWord_ideal_returns200():
+def test_updateBaseWord_ideal_returns200():
     word = generateBaseWord(word="oldWord")
 
     r = requests.patch(
@@ -18,11 +18,12 @@ def updateBaseWord_ideal_returns200():
     assert data["language_id"] == str(word["language_id"])
 
 
-def updateBaseWord_noWord_idempotent():
+def test_updateBaseWord_noWord_idempotent():
     word = generateBaseWord(word="oldWord")
 
     r = requests.patch(
         f"http://localhost:3000/base_words/{word["id"]}",
+        json={},
     )
 
     assert r.status_code == 200
@@ -33,11 +34,12 @@ def updateBaseWord_noWord_idempotent():
     assert data["language_id"] == str(word["language_id"])
 
 
-def updateBaseWord_idDoesntExist_returns404():
+def test_updateBaseWord_idDoesntExist_returns404():
     dummyId = uuid4()
 
     r = requests.patch(
         f"http://localhost:3000/base_words/{dummyId}",
+        json={},
     )
 
     assert r.status_code == 404

@@ -9,6 +9,11 @@ from languages.languageEndpoints import languageRouter
 from dialects.dialectEndpoints import dialectRouter
 from regions.regionEndpoints import regionsRouter
 from baseWords.baseWordEndpoints import baseWordRouter
+from wordVariants.wordVariantEndpoints import wordVariantRouter
+from requestedWords.requestedWordEndpoints import requestedWordRouter
+from users.userEndpoints import userRouter
+from sessionTokens.sessionTokenEndpoints import sessionTokenRouter
+from languageToCountries.languageToCountryEndpoints import languageToCountryRouter
 
 flaskPort = int(os.environ["FLASK_PORT"]) if os.environ["FLASK_PORT"] else 3000
 serverEnvironment = os.environ.get("SERVER_ENV", "dev")
@@ -24,6 +29,11 @@ app.register_blueprint(languageRouter)
 app.register_blueprint(dialectRouter)
 app.register_blueprint(regionsRouter)
 app.register_blueprint(baseWordRouter)
+app.register_blueprint(wordVariantRouter)
+app.register_blueprint(requestedWordRouter)
+app.register_blueprint(userRouter)
+app.register_blueprint(sessionTokenRouter)
+app.register_blueprint(languageToCountryRouter)
 
 
 @app.route("/")

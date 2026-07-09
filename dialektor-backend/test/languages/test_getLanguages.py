@@ -24,8 +24,8 @@ def test_getLanguage_ideal_200():
     assert data["script"] == language["script"]
 
 
-# Get all countries
-def test_getCountries_noCountries_200():
+# Get all languages
+def test_getLanguages_noLanguages_200():
     r = requests.get(f"http://localhost:3000/languages/")
     assert r.status_code == 200
 
@@ -33,7 +33,7 @@ def test_getCountries_noCountries_200():
     assert data == []
 
 
-def test_getCountries_ideal_200():
+def test_getLanguages_ideal_200():
     ids = [
         uuid4(),
         uuid4(),

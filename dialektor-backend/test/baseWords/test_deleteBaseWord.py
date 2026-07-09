@@ -4,7 +4,7 @@ from test.common import queryOne
 from test.generators import generateBaseWord
 
 
-def deleteBaseWord_ideal_returns200():
+def test_deleteBaseWord_ideal_returns200():
     word = generateBaseWord()
 
     r = requests.delete(f"http://localhost:3000/base_words/{word["id"]}")
@@ -25,7 +25,7 @@ def deleteBaseWord_ideal_returns200():
     assert dbResult is None
 
 
-def deleteBaseWord_wordNotFound_returns200():
+def test_deleteBaseWord_wordNotFound_returns200():
     dummyId = uuid4()
 
     r = requests.delete(f"http://localhost:3000/base_words/{dummyId}")

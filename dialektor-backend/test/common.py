@@ -75,13 +75,14 @@ def update(sql: LiteralString, params: Optional[tuple[Any, ...]] = None):
 
 
 def truncate_db():
-    update(f"TRUNCATE TABLE versions CASCADE;")
+    update(f"TRUNCATE TABLE session_tokens CASCADE;")
+    update(f"TRUNCATE TABLE users CASCADE;")
+    update(f"TRUNCATE TABLE requested_words CASCADE;")
+    update(f"TRUNCATE TABLE word_variants CASCADE;")
+    update(f"TRUNCATE TABLE language_to_countries CASCADE;")
+    update(f"TRUNCATE TABLE base_words CASCADE;")
+    update(f"TRUNCATE TABLE dialects CASCADE;")
+    update(f"TRUNCATE TABLE regions CASCADE;")
     update(f"TRUNCATE TABLE languages CASCADE;")
     update(f"TRUNCATE TABLE countries CASCADE;")
-    update(f"TRUNCATE TABLE regions CASCADE;")
-    update(f"TRUNCATE TABLE dialects CASCADE;")
-    update(f"TRUNCATE TABLE base_words CASCADE;")
-    update(f"TRUNCATE TABLE word_variants CASCADE;")
-    update(f"TRUNCATE TABLE requested_words CASCADE;")
-    update(f"TRUNCATE TABLE users CASCADE;")
-    update(f"TRUNCATE TABLE session_tokens CASCADE;")
+    update(f"TRUNCATE TABLE versions CASCADE;")
